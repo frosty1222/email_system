@@ -14,13 +14,33 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage }).single('image');
 const User = require('../models/User');
+const db = require('../dbconnect');
 class UserController{
   async login(req,res){
     try {
-      const getAllUser = await User.getAllUsers();
-      res.render('user/login', { user: getAllUser });
+      res.render('user/login', {error:""});
     } catch (error) {
        console.log(error)
+    }
+  }
+  async postLogin(req, res) {
+    const pool = await db.connect();
+    const { username, password } = req.body;
+    const user = await pool.query('SELECT * FROM users WHERE fullName = ?', [username]);
+    let error = "";
+    if (user[0].length > 0) {
+        const storedPassword = user[0][0].password;
+        if (password === storedPassword) {
+            res.redirect("/inbox/index");
+        } else {
+            // Incorrect password
+            error = "Incorrect password";
+            res.render('user/login', { error: error });
+        }
+    } else {
+        // User not found
+        error = "Incorrect username";
+        res.render('user/login', { error: error });
     }
   }
 }

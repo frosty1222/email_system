@@ -5,21 +5,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/public/css/user.css">
+  <link rel="stylesheet" type="text/css" href="/css/user.css">
   <title>Login Page</title>
 </head>
 <body>
   <div class="container">
-    <h2>Login</h2>
-    <form action="/login" method="post">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
-
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
-
-      <button type="submit">Login</button>
-    </form>
+    <div class="login-container">
+      <h2>Login</h2>
+       <% if (error) { %>
+        <div class="error-message" id="errorMessage">
+            <h5><%= error %></h5>
+        </div>
+       <% } %>
+      <form action="/user/login" method="post">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required="true">
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required="true">
+        </div>
+        <div class="button">
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    </div>
   </div>
+  <script>
+//   const errorMessage = document.getElementById('errorMessage');
+
+//   function hideErrorMessage() {
+//       errorMessage.style.display = 'none';
+//   }
+
+//  setTimeout(hideErrorMessage, 3000);
+  </script>
 </body>
 </html>

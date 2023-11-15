@@ -8,13 +8,13 @@ const route = require('./routes');
 app.use(express.json());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   express.urlencoded({
     extended: true,
   }),
 );
 db.connect();
-app.use(express.static(path.join(__dirname, 'public')));
 
 route(app);
 const node_port = process.env.PORT;
