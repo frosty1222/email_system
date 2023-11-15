@@ -1,0 +1,29 @@
+
+  .header-container{
+    width:100%;
+    box-shadow: 0.1px 0.1px 0.1px 3px silver;
+    display: flex;
+    justify-content: center;
+    padding: 10px 10px;
+    position: relative;
+    gap: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: center;
+  }
+  .header-container .name-section{
+    width: 45%;
+    text-align: left;
+  }
+  .header-container .logout-button{
+    width: 45%;
+    text-align: right;
+  }
+  .header-container .logout-button button{
+    padding: 5px 10px;
+    background-color: green;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }

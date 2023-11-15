@@ -26,22 +26,38 @@ class UserController{
   async postLogin(req, res) {
     const pool = await db.connect();
     const { username, password } = req.body;
-    const user = await pool.query('SELECT * FROM users WHERE fullName = ?', [username]);
-    let error = "";
-    if (user[0].length > 0) {
+  
+    try {
+      const user = await pool.query('SELECT * FROM users WHERE fullName = ?', [username]);
+  
+      if (user[0].length > 0) {
         const storedPassword = user[0][0].password;
+  
         if (password === storedPassword) {
-            res.redirect("/inbox/index");
+          // Set user information in the cookie
+          res.cookie('user', user[0][0], { httpOnly: true });
+  
+          // Redirect to the inbox page
+          res.redirect("/inbox/index");
         } else {
-            // Incorrect password
-            error = "Incorrect password";
-            res.render('user/login', { error: error });
+          // Incorrect password
+          const error = "Incorrect password";
+          res.render('user/login', { error });
         }
-    } else {
+      } else {
         // User not found
-        error = "Incorrect username";
-        res.render('user/login', { error: error });
+        const error = "Incorrect username";
+        res.render('user/login', { error });
+      }
+    } catch (error) {
+      // Handle database query error
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    } finally {
+      // Make sure to release the connection back to the pool
+      await pool.end();
     }
   }
+  
 }
 module.exports = new UserController();

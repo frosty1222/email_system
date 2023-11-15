@@ -1,21 +1,17 @@
-const secret =process.env.SECRET_KEY;
-const express = require('express');
-const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
-module.exports = { 
-  TokenCheckMiddleware:async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-     if(!req.headers['authorization']){
-        return next(createError.Unauthorized());
-     }else{
-      const token = authHeader.split(' ')[1];
-      await jwt.verify(token,secret,(err,payload)=>{
-          if(err){
-           return next(createError.Unauthorized());
-          }
-             req.payload = payload;
-             next();
-      })
-     }
+
+module.exports = {
+  TokenCheckMiddleware: (req, res, next) => {
+    const userCookie = req.cookies.user;
+
+    if (!userCookie) {
+      return res.redirect('/user/login');
+    }
+
+    const userId = userCookie.id;
+    const fullName = userCookie.fullName;
+    req.payload = { userId, fullName };
+
+    next();
   }
-}
+};

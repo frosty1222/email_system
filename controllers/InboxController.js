@@ -17,7 +17,9 @@ const db = require('../dbconnect');
 const pool = db.connect();
 class InboxController{
     async inbox(req,res){
-        res.render('main-view/inbox',{})
+      const userCookie = req.cookies.user;
+      console.log(userCookie)
+        res.render('layouts/main',{user:userCookie,page:'inbox'})
     }
 }
 module.exports = new InboxController();
