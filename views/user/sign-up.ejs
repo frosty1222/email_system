@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/css/user.css">
+  <title>Sign Up Page</title>
+</head>
+<body>
+  <div class="container">
+    <div class="sign-up">
+      <h2>Sign Up</h2>
+      <div class="err-message">
+        <% if(err_message) {%>
+          <%= err_message %>
+        <% } %>
+      </div>
+      <form action="/user/sign-up" method="post">
+        <div class="form-group">
+          <label for="fullName">Username:</label>
+          <input type="text" id="fullName" name="fullName" required="true" autocomplete="off">
+        </div>
+        <div class="error-message" id="fullNameMess">
+            <% if(nameErr) {%>
+                <%= nameErr  %>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required="true" autocomplete="off">
+          </div>
+        <div class="error-message">
+            <% if(emailErr) {%>
+                <%= emailErr  %>
+            <% } %>
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" onchange="onchangePassword(event)" required="true" autocomplete="off">
+        </div>
+        <div class="error-message">
+            <% if(passWordErr) {%>
+                <%= passWordErr  %>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="repassword">Re-password:</label>
+            <input type="password" id="repassword" name="repassword" onchange="onchangeRepassWord(event)" required="true" autocomplete="off">
+        </div>
+        <div class="error-message" id="errorMessageRepass">
+            <% if(rePassErr) {%>
+                <%= rePassErr  %>
+            <% } %>
+        </div>
+        <div class="button">
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    let password = null;
+   function onchangePassword(event){
+      password = event.target.value;
+      if(password.length <=6){
+        var myElement = document.getElementById('errorMessageRepass');
+        myElement.textContent = 'The password must greater than 6 characters';
+      }else{
+        var myElement = document.getElementById('errorMessageRepass');
+        myElement.textContent = '';
+      }
+    }
+   function onchangeRepassWord(event){
+        if(event.target.value !== password){
+            var myElement = document.getElementById('errorMessageRepass');
+            myElement.textContent = 'Re-enter password does not match password';
+        }else{
+          var myElement = document.getElementById('errorMessageRepass');
+            myElement.textContent = '';
+        }
+    }
+  const fullNameMess = document.getElementById('fullNameMess');
+
+  function hideErrorMessage() {
+    fullNameMess.style.display = 'none';
+  }
+
+ setTimeout(hideErrorMessage, 3000);
+  </script>
+</body>
+</html>

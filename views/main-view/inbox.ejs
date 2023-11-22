@@ -1,3 +1,107 @@
 <div class="inbox-view-content">
-    <h2>inbox page</h2>
+    <h2>Inbox page</h2>
+    <% if(totalPages > 0){ %>
+    <button class="button-detail" type="button"><a href="#" onclick="gotoDetailPage()">See Detail</a></button>
+    <button class="button-delete" type="button" onclick="deleteEmail()">Delete selected</button>   
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Select to delete</th>
+                    <th>Sender fullName</th>
+                    <th>Email subject</th>
+                    <th>Time received</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach(function(item,index){ %>
+                <tr>
+                    <td><%= index+1  %></td>
+                    <td><input type="checkbox" value="<%= item.in_out_box_id %>" onclick="getId('<%= item.in_out_box_id %>')"></td>
+                    <td><%= item.sender %></td>
+                    <td><%= item.subject %></td>
+                    <td><%= item.created_at %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <div class="pagination-inbox">
+            <div class="main-pagination">
+                <span id="prevPage"><<</span>
+                <ul>
+                    <% paginatePage.forEach(function(item,index){ %>
+                        <li><a href="#" onclick="changePage(event,`<%=item%>`,`<%=paginatePage.length%>`)" data-page="<%= item %>"><%= item  %></a></li>
+                    <% }); %>
+                </ul>
+                <span id="nextPage">>></span>
+            </div>
+        </div>
+    </div>
+    <% }else{ %>
+        you don't have any inbox yet 
+    <% } %>
 </div>
+<script>
+    let selectedId;
+    function getId(id){
+        selectedId = id;
+    }
+    function gotoDetailPage(){
+        window.location.href = "/inbox/in-out-box/detail/" + selectedId + "/in";
+    }
+    function deleteEmail(){
+        window.location.href = "/inbox/in-out-box/delete/" + selectedId + "/in";
+    }
+    let paginatePageLength = null
+
+    function changePage(event, pageNumber, paginatePage) {
+        paginatePageLength = paginatePage;
+
+        // Prevent the default behavior of the anchor link
+        event.preventDefault();
+
+        // Remove the active class from all pagination links
+        const paginationLinks = document.querySelectorAll('.main-pagination ul li a');
+        paginationLinks.forEach(link => link.classList.remove('active'));
+
+        // Add the active class to the clicked link
+        event.target.classList.add('active');
+
+        // Update the page parameter in the URL
+        window.location.href = `/inbox/index?page=${pageNumber}`;
+    }
+
+    // Add event listeners for previous and next buttons
+    document.getElementById('prevPage').addEventListener('click', function (event) {
+        const currentPage = document.querySelector('.main-pagination ul li a.active');
+        const currentPageNumber = parseInt(currentPage.textContent);
+        if (currentPageNumber > 1) {
+            changePage(event, currentPageNumber - 1, paginatePageLength);
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function (event) {
+        const currentPage = document.querySelector('.main-pagination ul li a.active');
+        const currentPageNumber = parseInt(currentPage.textContent);
+        // Update the maximum page number based on your total number of pages
+        const maxPages = paginatePageLength;
+        if (currentPageNumber < maxPages) {
+            changePage(event, currentPageNumber + 1, paginatePageLength);
+        }
+    });
+    function setActivePage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageParam = urlParams.get('page');
+        if (pageParam) {
+            const currentPage = document.querySelector(`.main-pagination ul li a[data-page="${pageParam}"]`);
+            if (currentPage) {
+                currentPage.classList.add('active');
+            }
+        }
+    }
+
+    // Call the function on page load
+    window.onload = setActivePage;
+</script>
+

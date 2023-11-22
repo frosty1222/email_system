@@ -28,6 +28,14 @@ body {
   padding: 5px 10px;
   margin-top: 15%;
 }
+.container .sign-up{
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+  margin-top: 15%;
+}
 .login-container form .form-group{
    width: 100%;
    display: flex;
@@ -71,4 +79,50 @@ body {
   background-color: #000;
   color: #fff;
   cursor: pointer;
+}
+/* sign-up */
+.sign-up form .form-group{
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.sign-up h2{
+ text-align: center;
+}
+.sign-up form .form-group label{
+ width: 31%;
+ font-weight: 700;
+}
+.sign-up form .form-group input{
+ height: 35px;
+ width: 80%;
+ outline: none;
+ border-radius: 5px;
+ border: 1px solid;
+ padding-left: 5px;
+}
+.sign-up form .button{
+ width: 100%;
+ text-align: center;
+}
+.sign-up .error-message{
+ width: 100%;
+ height: auto;
+ display: block;
+ padding:5px 0px;
+}
+.sign-up .error-message{
+ color: red;
+}
+.sign-up form .button button{
+ height: 38px;
+ width:68px;
+ border-radius: 5px;
+ border: 1px solid;
+}
+.sign-up form .button button:hover{
+ background-color: #000;
+ color: #fff;
+ cursor: pointer;
 }

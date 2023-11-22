@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/css/main.css">
   <link rel="stylesheet" type="text/css" href="/css/side-bar.css">
-  <title>Login Page</title>
+  <title>Email System</title>
 </head>
 <body>
   <div class="container">
@@ -27,7 +27,7 @@
                         <%- include('../main-view/outbox.ejs') -%>
                       <% } else if(page === 'compose') { %>
                         <%- include('../main-view/compose.ejs') -%>
-                      <% } else if(page === 'email-detail') { %>
+                      <% } else if(page === 'detail') { %>
                         <%- include('../main-view/email-detail.ejs') -%>
                       <% }else { %>
                         <h2>Not found</h2>

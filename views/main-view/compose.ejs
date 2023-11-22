@@ -1,0 +1,56 @@
+<div class="compose-view-content">
+    <h2>Compose page</h2>
+    <div class="compose-content">
+        <div class="err-message">
+            <% if(error){ %>
+                <%= error %>
+            <% } %>
+        </div>
+        <div class="success-message">
+            <% if(message){ %>
+                <%= message %>
+            <% } %>
+        </div>
+        <form action="/inbox/compose" enctype="multipart/form-data" method="post">
+             <div class="form-group">
+                <label for="recipient">Recipient:</label>
+                 <select name="recipient" required="true">
+                    <option value="">----select recipient----</option>
+                    <% users.forEach(function(item) { %>
+                      <option value="<%= item.id %>"><%= item.fullName %></option>
+                      <% }); %>
+                 </select>
+                 <div class="err-mess">
+                      <% if(recipientErr){ %>
+                        <%=recipientErr  %>
+                      <% } %>
+                 </div>
+             </div>
+             <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input name="subject" required="true"></input>
+                <div class="err-mess">
+                    <% if(subjectErr){ %>
+                        <%=subjectErr  %>
+                     <% } %>
+                </div>
+             </div>
+             <div class="form-group">
+                <label for="subject">Content:</label>
+                <textarea name="content" required="true"></textarea>
+                <div class="err-mess">
+                    <% if(contentErr){ %>
+                        <%=contentErr  %>
+                     <% } %>
+                </div>
+             </div>
+             <div class="form-group">
+                <label for="images">Attach files:</label>
+                <input type="file" name="images" multiple>
+             </div>
+             <div class="form-group">
+                <button type="submit">Send</button>
+             </div>
+        </form>
+    </div>
+</div>

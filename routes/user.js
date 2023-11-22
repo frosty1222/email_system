@@ -4,4 +4,7 @@ const user_controller = require('../controllers/UserController');
 const TokenCheckMiddleware = require('../util/middleware');
 router.get('/login',user_controller.login);
 router.post('/login',user_controller.postLogin);
+router.get('/sign-up',user_controller.signUp);
+router.post('/sign-up',user_controller.postSignUp);
+router.get('/logout',user_controller.logout);
 module.exports = router;

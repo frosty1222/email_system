@@ -3,7 +3,7 @@ const dotenv = require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const app = express();
-const db = require('./dbconnect');
+// const db = require('./dbsetup');
 const route = require('./routes');
 app.use(cookieParser());
 app.use(express.json());
@@ -15,7 +15,7 @@ app.use(
     extended: true,
   }),
 );
-db.connect();
+// db.connect();
 
 route(app);
 const node_port = process.env.PORT;
