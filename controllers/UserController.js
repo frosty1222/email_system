@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
   });
   
 const upload = multer({ storage }).single('image');
-const db = require('../dbsetup');
+const db = require('../db');
 class UserController{
   async login(req,res){
     try {
@@ -23,7 +23,7 @@ class UserController{
     }
   }
   async postLogin(req, res) {
-    const pool = await db.connect();
+    const pool = await db.connectDb();
     const { username, password } = req.body;
   
     try {
@@ -69,7 +69,7 @@ class UserController{
   }
   async postSignUp(req, res) {
     const { fullName, email, password, repassword } = req.body;
-    const pool = await db.connect();
+    const pool = await db.connectDb();
     let emailErr = "";
     let nameErr = "";
     let passWordErr = "";

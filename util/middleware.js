@@ -5,7 +5,7 @@ module.exports = {
     const userCookie = req.cookies.user;
 
     if (!userCookie) {
-      return res.redirect('/user/login');
+       res.redirect('/exception/access-denied');
     }
 
     const userId = userCookie.id;

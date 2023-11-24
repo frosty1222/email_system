@@ -1,9 +1,9 @@
 const path = require('path');
 const multer = require('multer');
-const db = require('../dbsetup');
+const db = require('../db');
 const fs = require('fs');
 const secret = process.env.SECRET_KEY;
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 5;
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       const destinationPath = path.join(__dirname, '..', 'public', 'images');
@@ -19,55 +19,60 @@ class InboxController{
   async inbox(req, res) {
     const userCookie = req.cookies.user;
     const page = req.query.page || 1;
-    console.log("page:", page);
-
+  
     try {
-        const pool = await db.connect();
-
-        // Count total number of items
-        const totalCountQuery = `
-            SELECT COUNT(*) as count
-            FROM in_out_box
-            INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
-            INNER JOIN users ON user_has_in_out_box.user_id = users.id
-            WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?;
-        `;
-
-        const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, 'in']);
-        const totalCount = totalCountResult[0][0].count;
-        // Calculate pagination parameters
-        const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
-        const offset = ITEMS_PER_PAGE * (page - 1);
-        // Fetch paginated data
-        const paginatedQuery = `
-            SELECT *
-            FROM in_out_box
-            INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
-            INNER JOIN users ON user_has_in_out_box.user_id = users.id
-            WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?
-            LIMIT ? OFFSET ?;
-        `;
-
-        const inBox = await pool.query(paginatedQuery, [userCookie.id, 'in', ITEMS_PER_PAGE, offset]);
-           
-        // Generate an array representing the pagination pages
-        const paginatePage = Array.from({ length: totalPages }, (_, index) => index + 1);
-        res.render('layouts/main', {
-            user: userCookie,
-            page: 'inbox',
-            data: inBox[0],
-            paginatePage:paginatePage,
-            currentPage: page,
-            totalPages: totalPages,
-        });
+      const pool = await db.connectDb();
+  
+      // Count total number of items
+      const totalCountQuery = `
+        SELECT COUNT(*) as count
+        FROM in_out_box
+        INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
+        INNER JOIN users ON user_has_in_out_box.user_id = users.id
+        WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ? AND in_out_box.status = ?;
+      `;
+  
+      const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, 'in', 'on']);
+      const totalCount = totalCountResult[0][0].count;
+  
+      // Calculate pagination parameters
+      const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+      const offset = ITEMS_PER_PAGE * (page - 1);
+  
+      // Fetch paginated data
+      const paginatedQuery = `
+        SELECT *
+        FROM in_out_box
+        INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
+        INNER JOIN users ON user_has_in_out_box.user_id = users.id
+        WHERE user_has_in_out_box.user_id = ? 
+        AND user_has_in_out_box.type = ? 
+        AND in_out_box.status = ? 
+        AND user_has_in_out_box.status = ?
+        LIMIT ? OFFSET ?;
+      `;
+  
+      const inBox = await pool.query(paginatedQuery, [userCookie.id, 'in','on','on', ITEMS_PER_PAGE, offset]);
+  
+      // Generate an array representing the pagination pages
+      const paginatePage = Array.from({ length: totalPages }, (_, index) => index + 1);
+      res.render('layouts/main', {
+        user: userCookie,
+        page: 'inbox',
+        data: inBox[0],
+        paginatePage: paginatePage,
+        currentPage: page,
+        totalPages: totalPages,
+      });
     } catch (error) {
-        // Handle database query error
-        console.error('Error fetching inbox data:', error);
-        res.status(500).send('Internal Server Error');
+      // Handle database query error
+      console.error('Error fetching inbox data:', error);
+      res.status(500).send('Internal Server Error');
     }
   }
+  
     async compose(req, res) {
-      const pool = await db.connect();
+      const pool = await db.connectDb();
       try {
         const userCookie = req.cookies.user;
         const result = await pool.query("SELECT * FROM users WHERE id != ?", [userCookie.id]);
@@ -87,7 +92,7 @@ class InboxController{
       }
     }
     async postCompose(req, res) {
-      const pool = await db.connect();
+      const pool = await db.connectDb();
       let userCookie;
       let result;
       let message = "";
@@ -109,7 +114,8 @@ class InboxController{
                 page: "compose",
                 message: "",
                 recipientErr:"",
-                subjectErr:"" 
+                subjectErr:"" ,
+                contentErr:""
               });
             } else if (err) {
               return res.status(500).json({ error: err.message });
@@ -189,7 +195,7 @@ class InboxController{
       const page = req.query.page || 1;
   
       try {
-          const pool = await db.connect();
+          const pool = await db.connectDb();
   
           // Count total number of items
           const totalCountQuery = `
@@ -197,10 +203,10 @@ class InboxController{
               FROM in_out_box
               INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
               INNER JOIN users ON user_has_in_out_box.user_id = users.id
-              WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?;
+              WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ? AND in_out_box.status = ?;
           `;
   
-          const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, 'out']);
+          const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, 'out','on']);
           const totalCount = totalCountResult[0][0].count;
           // Calculate pagination parameters
           const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -208,15 +214,15 @@ class InboxController{
   
           // Fetch paginated data
           const paginatedQuery = `
-              SELECT *
-              FROM in_out_box
-              INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
-              INNER JOIN users ON user_has_in_out_box.user_id = users.id
-              WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?
-              LIMIT ? OFFSET ?;
-          `;
-  
-          const outBox = await pool.query(paginatedQuery, [userCookie.id, 'out', ITEMS_PER_PAGE, offset]);
+          SELECT *
+          FROM in_out_box
+          INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
+          INNER JOIN users ON user_has_in_out_box.user_id = users.id
+          WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ? AND in_out_box.status = ?
+          LIMIT ? OFFSET ?;
+        `;
+        
+        const outBox = await pool.query(paginatedQuery, [userCookie.id, 'out', 'on', ITEMS_PER_PAGE, offset]);
           const paginatePage = Array.from({ length: totalPages }, (_, index) => index + 1);
           res.render('layouts/main', {
               user: userCookie,
@@ -227,12 +233,13 @@ class InboxController{
               totalPages: totalPages,
           });
       } catch (error) {
+        console.log(error)
           res.status(500).send('Internal Server Error');
       }
     }
     // 
     async inOutBoxDetail(req,res){
-      const pool = await db.connect();
+      const pool = await db.connectDb();
       const userCookie = req.cookies.user;
        const {id,type} = req.params;
        const Query = `
@@ -283,66 +290,68 @@ class InboxController{
     }
 
     // delete email
-    async deleteEmail(req,res){
-        const {id,type} = req.params;
-        const pool = await db.connect();
+    async deleteEmail(req, res) {
+      try {
+        const { id, type } = req.params;
+        const pool = await db.connectDb();
         const userCookie = req.cookies.user;
         const updateUserInOutBoxQuery = `
-        UPDATE user_has_in_out_box
-        SET status = 'off'
-        WHERE user_id = ? AND in_out_box_id = ? AND type = ?
+          UPDATE user_has_in_out_box
+          SET status = 'off'
+          WHERE user_id = ? AND in_out_box_id = ? AND type = ?
         `;
         const updateUserInOutBoxQuery2 = `
-        UPDATE in_out_box
-        SET status = 'off'
-        WHERE id = ?
-      `;
-     const user_has_in_out_box =  await pool.query(updateUserInOutBoxQuery, [userCookie.id, id,type]);
-     const in_out_box_update = await pool.query(updateUserInOutBoxQuery2, [id]);
-     const page = req.query.page || 1;
-     if(user_has_in_out_box[0].affectedRows > 0 && in_out_box_update[0].affectedRows){
-      try {
-        const pool = await db.connect();
-
-        // Count total number of items
+          UPDATE in_out_box
+          SET status = 'off'
+          WHERE id = ?
+        `;
+        const user_has_in_out_box = await pool.query(updateUserInOutBoxQuery, [userCookie.id, id, type]);
+        const in_out_box_update = await pool.query(updateUserInOutBoxQuery2, [id]);
+        const page = req.query.page || 1;
+    
+        if (user_has_in_out_box[0].affectedRows > 0 && in_out_box_update[0].affectedRows) {
+          // Count total number of items
           const totalCountQuery = `
-              SELECT COUNT(*) as count
-              FROM in_out_box
-              INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
-              INNER JOIN users ON user_has_in_out_box.user_id = users.id
-              WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?;
+            SELECT COUNT(*) as count
+            FROM in_out_box
+            INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
+            INNER JOIN users ON user_has_in_out_box.user_id = users.id
+            WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?;
           `;
-
-          const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, 'out']);
+    
+          const totalCountResult = await pool.query(totalCountQuery, [userCookie.id, type]);
           const totalCount = totalCountResult[0][0].count;
+    
           // Calculate pagination parameters
           const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
           const offset = ITEMS_PER_PAGE * (page - 1);
-
+    
           // Fetch paginated data
           const paginatedQuery = `
-              SELECT *
-              FROM in_out_box
-              INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
-              INNER JOIN users ON user_has_in_out_box.user_id = users.id
-              WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ?
-              LIMIT ? OFFSET ?;
+            SELECT *
+            FROM in_out_box
+            INNER JOIN user_has_in_out_box ON user_has_in_out_box.in_out_box_id = in_out_box.id
+            INNER JOIN users ON user_has_in_out_box.user_id = users.id
+            WHERE user_has_in_out_box.user_id = ? AND user_has_in_out_box.type = ? AND in_out_box.status = ?
+            LIMIT ? OFFSET ?;
           `;
-
-          const outBox = await pool.query(paginatedQuery, [userCookie.id,type, ITEMS_PER_PAGE, offset]);
+    
+          const outBox = await pool.query(paginatedQuery, [userCookie.id, type,'on', ITEMS_PER_PAGE, offset]);
           const paginatePage = Array.from({ length: totalPages }, (_, index) => index + 1);
+    
           res.render('layouts/main', {
-              user: userCookie,
-              page: 'outbox',
-              data: outBox[0],
-              paginatePage:paginatePage,
-              currentPage: page,
-              totalPages: totalPages,
+            user: userCookie,
+            page: type+'box',
+            data: outBox[0],
+            paginatePage: paginatePage,
+            currentPage: page,
+            totalPages: totalPages,
           });
-        } catch (error) {
-            res.status(500).send('Internal Server Error');
         }
-     }
+      } catch (error) {
+        console.error('Error in deleteEmail:', error.message);
+        res.status(500).send('Internal Server Error');
+      }
     }
 }
 module.exports = new InboxController();

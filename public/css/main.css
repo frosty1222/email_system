@@ -166,6 +166,7 @@ height: 100vh;
     border: none;
     float: right;
     margin-bottom:10px;
+    cursor: pointer;
 }
 .inbox-view-content .button-detail{
     width: 150px;
